@@ -196,7 +196,137 @@ void invert_image(Image& image) {
 
 // ========================================================>> Filter 4: Merge two Images <<=============================================================== //
 
+void merge_filter(Image &image1){
+    cout << "# ==== Welcome to Merge Two Image Filter ==== #\n\n";
 
+    // To get image2 to merge it with image1.
+    string name2;
+    cout << "Please, Enter the second image:";
+    getline(cin, name2);
+    name2 = validationpart1(name2);
+    Image image2(name2);
+
+    // To see the user how he wants to merge.
+    cout << "What do you prefer?\n [1] Crop the Two Images common Diminsion. \n [2] Resize one of them to fit the other\n Your choice is: ";
+    string choice;
+    getline(cin, choice);
+    // To check the menu choice.
+    while (choice != "1" && choice != "2") {
+        cout << "pls enter a valid choice\n";
+        getline(cin, choice);
+    }
+
+    // Define some needed variables
+    double WidthImage = 0, Length = 0;
+    string ans;
+    Image res;
+
+    // If he chooses crop.
+    if (choice == "1") {
+        //comparing width
+        if (image1.width > image2.width) {
+            WidthImage = image2.width;
+        }
+        else {
+            WidthImage = image1.width;
+        }
+
+        // comparing length
+        if (image1.height > image2.height) {
+            Length = image2.height;
+        }
+        else {
+            Length = image1.height;
+        }
+    }
+
+        // If he chooses resize.
+    else if (choice == "2") {
+        // To see what user will choose.
+        cout << "Choose: Which one do you want to fit the other?\n [1] the first image to the second one\n [2] The second image to the first one\nEnter your choice: ";
+        getline(cin, ans);
+        // For menu validation
+        while (ans != "1" && ans != "2"){
+            cout << "enter a valid choice\n";
+            getline(cin, ans);
+        }
+
+        // If he chooses the first image to the second one.
+        double change_width, change_height;
+        if (ans == "1"){
+            change_width = double(image1.width) / double(image2.width);
+            change_height = double(image1.height) / double(image2.height);
+
+            // Resize image function
+            Image image3(image2.width, image2.height);
+            for (double i = 0; i < image2.height; i++) {
+                for (double j = 0; j < image2.width; j++) {
+                    for (int k = 0; k < 3; k++)
+                        image3(j, i, k) = image1(round(j * change_width), round(i * change_height), k);
+                }
+            }
+            res = image3;
+            WidthImage = image3.width;
+            Length = image3.height;
+        }
+
+            // If he chooses the second image to the first one.
+        else {
+            change_width = double(image2.width) / double(image1.width);
+            change_height = double(image2.height) / double(image1.height);
+
+            // Resize image function
+            Image image3(image1.width, image1.height);
+            for (double i = 0; i < image1.height; i++) {
+                for (double j = 0; j < image1.width; j++) {
+                    for (int k = 0; k < 3; k++)
+                        image3(j, i, k) = image2(round(j * change_width), round(i * change_height), k);
+                }
+            }
+            res = image3;
+            WidthImage = image3.width;
+            Length = image3.height;
+        }
+    }
+
+    // Defining some images
+    Image imagee(WidthImage, Length);
+    Image main1;
+    Image main2;
+
+    // if crop
+    if (choice == "1"){
+        main1 = image1;
+        main2 = image2;
+    }
+
+        // if resize
+    else if (choice == "2"){
+        if (ans == "1") {
+            main1 = res;
+            main2 = image2;
+        }
+        else if (ans == "2") {
+            main1 = image1;
+            main2 = res;
+        }
+    }
+
+    // The idea of merge.
+    for (int i = 0; i < imagee.width; i++){
+        for (int j = 0; j < imagee.height; j++){
+            for (int k = 0; k < 3; k++){
+                if (j % 2 == 0) {
+                    imagee(i, j, k) = main1(i, j, k);
+                }
+                else {
+                    imagee(i, j, k) = main2(i, j, k);
+                }
+            }
+        }
+    }
+    image1 = imagee;
+}
 
 // ========================================================>> Filter 5: Flip image <<================================================================ //
 
@@ -291,10 +421,9 @@ void Flip_image(Image& image) {
 
 // ========================================================>> Filter 6: Rotate Image <<======================================================== //
 
-void rotate_image(string image_address) {
+void rotate_image(Image &image) {
 
     cout << endl << "# ===== Welcome to Rotate Image Filter ===== #" << endl;
-    Image image(image_address);
     Image image2(image.height, image.width);
     string choice;
     bool valid = false;
@@ -361,14 +490,8 @@ void rotate_image(string image_address) {
             }
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    if (valid)
-        image.saveImage(saved);
-    else
-        image2.saveImage(saved);
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
+    if (!valid)
+        image = image2;
 }
 
 //=========================================================>> Filter 7: Lighten And Darken <<===============================================================//
@@ -410,8 +533,7 @@ void Lighten_Darken(Image& image) {
 
 //=========================================================>> Filter 8: Crop image filter <<===============================================================//
 
-void crop_image(string image_address) {
-    Image img(image_address);
+void crop_image(Image &img) {
     // To show the user image data.
     cout << endl << "# ===== Welcome to Crop Image Filter ===== #" << endl;
     cout << "Image Height is : " << img.height << endl;
@@ -440,18 +562,14 @@ void crop_image(string image_address) {
         }
         image_width++;
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
+    img = image;
 }
+
 
 // ========================================================>> Filter 9: Adding a Frame to the Picture <<================================================= //
 
-void adding_a_frame(string image_address) {
+void adding_a_frame(Image &image) {
     cout << "\n# ===== Welcome to the Adding a Frame to the Picture Filter ===== #\n";
-    Image image(image_address);
     ll Min = min(image.height, image.width);
     Image image1(image.width + (Min * 0.02), image.height + (Min * 0.02));
     string ch_colour, frame;
@@ -561,19 +679,13 @@ void adding_a_frame(string image_address) {
             }
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image1.saveImage(saved);
-    system(saved.c_str());
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
+    image1 = image;
 }
 
 //=========================================================>> Filter 10 : Detect edges <<=================================================================//
 
 void detect_edges(Image& image) {
     cout << "\n# ===== Welcome to detect edges filter ===== #\n";
-    //Image image(photo);
     Image image2(image.width, image.height);
 
     // The idea of black and white filter.
@@ -601,321 +713,237 @@ void detect_edges(Image& image) {
         for (int j = 0; j < image.height; j++) {
             if (i == 0 && j == 0) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
-
+                avg3 = avg3 / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j + 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
-                }
-                else {
-                    for (int k = 0; k < 3; k++)
-                    {
-                        image2(i, j, k) = 255;
-                    }
                 }
 
+                else {
+                    for (int k = 0; k < 3; k++)
+                        image2(i, j, k) = 255;
+                }
             }
+
             else if (i == 0 && j == image.height - 1) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j - 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
+
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
-
             }
+
             else if (i == image.width - 1 && j == 0) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i - 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j + 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
+
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
-                }
-                else {
-                    for (int k = 0; k < 3; k++)
-                    {
-                        image2(i, j, k) = 255;
-                    }
                 }
 
+                else {
+                    for (int k = 0; k < 3; k++)
+                        image2(i, j, k) = 255;
+                }
             }
+
             else if (i == image.width - 1 && j == image.height - 1) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j - 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
-
             }
+
             else if (i == 0) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg2 += image(i, j + 1, k);
-                }
                 avg2 = avg2 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j - 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127 || fabs(avg - avg2) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
 
             }
             else if (i == image.width - 1) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg2 += image(i, j + 1, k);
-                }
                 avg2 = avg2 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i - 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j - 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127 || fabs(avg - avg2) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
 
             }
             else if (j == 0) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg2 += image(i, j + 1, k);
-                }
                 avg2 = avg2 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i - 1, j, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127 || fabs(avg - avg2) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
 
             }
             else if (j == image.height - 1) {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg2 += image(i, j - 1, k);
-                }
                 avg2 = avg2 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i - 1, j, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 if (fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127 || fabs(avg - avg2) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
 
             }
             else {
                 for (int k = 0; k < 3; k++)
-                {
                     avg += image(i, j, k);
-                }
                 avg = avg / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg2 += image(i - 1, j, k);
-                }avg2 = avg2 / 3;
+                avg2 = avg2 / 3;
                 for (int k = 0; k < 3; k++)
-                {
                     avg3 += image(i + 1, j, k);
-                }avg3 = avg3 / 3;
+                avg3 = avg3 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg4 += image(i, j + 1, k);
-                }avg4 = avg4 / 3;
+                avg4 = avg4 / 3;
 
                 for (int k = 0; k < 3; k++)
-                {
                     avg5 += image(i, j - 1, k);
-                }avg5 = avg5 / 3;
+                avg5 = avg5 / 3;
+
                 if (fabs(avg - avg2) >= 127 || fabs(avg - avg3) >= 127 || fabs(avg - avg3) >= 127 || fabs(avg - avg4) >= 127 || fabs(avg - avg5) >= 127) {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 0;
-                    }
                 }
                 else {
                     for (int k = 0; k < 3; k++)
-                    {
                         image2(i, j, k) = 255;
-                    }
                 }
             }
             avg = 0, avg2 = 0, avg3 = 0, avg4 = 0, avg5 = 0;
         }
     }
-
-    // To save and open image.
     image = image2;
-    /* string saved = savingWay(photo);
-     image.saveImage(saved);
-     cout << endl << "Image saved in " << saved << " successfully." << endl << endl;*/
 }
 
 // =========================================================>> Filter 11: Resize Image filter <<===========================================================//
 
-void resize_filter(string image_address) {
-    Image img(image_address);
+void resize_filter(Image &img) {
     // To show the user image data.
     cout << endl << "# ===== Welcome to Resize Image Filter ===== #" << endl;
     cout << "Image Height is : " << img.height << endl;
@@ -962,18 +990,13 @@ void resize_filter(string image_address) {
                 image(j, i, k) = img(round(j * change_width), round(i * change_height), k);
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
+    img = image;
 }
 
 // ========================================================>> Filter 12: Blur Images <<===================================================================//
 
-void blur_images(string image_address) {
+void blur_images(Image& image) {
     cout << "\n# ===== Welcome to the Blur Images Filter ===== #\n";
-    Image image(image_address);
     ll r = 35, area = ((2 * r) + 1) * ((2 * r) + 1);
 
     // To build 3D prefix sum vector.
@@ -1019,90 +1042,36 @@ void blur_images(string image_address) {
             }
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    system(saved.c_str());
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
 }
 
 // ========================================================>> Filter 13: natural sunlight filter <<========================================================//
 
-void natural_sunlight(string image_address) {
+void natural_sunlight(Image &image) {
     cout << "\n# ===== Welcome to the Natural Sunlight Filter ===== #\n";
-    Image image(image_address);
 
     for (int i = 0; i < image.width; ++i) {
         for (int j = 0; j < image.height; ++j) {
             for (int k = 0; k < 3; ++k) {
-                image(i, j, 2) *= 0.888;
-            }
-        }
-    }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    system(saved.c_str());
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
-}
-// =================================================>> Filter 14: Oil Painting filter<<===================================================================== //
-
-
-
-// =================================================>> Filter 15: Den Den Mochi Filter <<=================================================================== //
-
-void old_tv(Image& image)
-{
-    cout << "\n# ===== Welcome to The TV Filter ===== #\n";
-    srand(unsigned int(time(0)));
-    int intens = 25;
-
-    for (int i = 0; i < image.width; i++)
-    {
-        for (int j = 0; j < image.height; j++)
-        {
-            int random = rand() % (2 * intens + 1) - intens;
-            image(i, j, 0) = (random + image(i, j, 0)) / 2;
-            image(i, j, 1) = (random + image(i, j, 1)) / 2;
-            image(i, j, 2) = (random + image(i, j, 2)) / 2;
-
-            if (j % 2 == 0)
-            {
-                image(i, j, 0) /= 2;
-                image(i, j, 1) /= 2;
-                image(i, j, 2) /= 2;
-            }
+                image(i, j, 2) *= 0.888;}
         }
     }
 }
 
-// =================================================>> Filter 16: Make photo more purple <<================================================================ //
+// =================================================>> Filter 14: Make photo more purple <<================================================================ //
 
-void look_purple(string image_address) {
+void look_purple(Image &image) {
     cout << "\n# ===== Welcome to the Look Purple Filter ===== #\n";
-    Image image(image_address);
-
     for (int i = 0; i < image.width; ++i) {
         for (int j = 0; j < image.height; ++j) {
             image(i, j, 1) *= 0.7;
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    system(saved.c_str());
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
 }
 
-// =================================================>> Filter 17: infrared pics Filter <<=================================================================== //
+// =================================================>> Filter 15: infrared pics Filter <<=================================================================== //
 
-void infrared(string image_address) {
+void infrared(Image &image) {
     cout << "\n# ===== Welcome to the Infrared Photography Filter ===== #\n";
-    Image image(image_address);
-
     for (int i = 0; i < image.width; ++i) {
         for (int j = 0; j < image.height; ++j) {
             for (int k = 0; k < 3; ++k) {
@@ -1112,19 +1081,9 @@ void infrared(string image_address) {
             }
         }
     }
-
-    // To save and open image.
-    string saved = savingWay(image_address);
-    image.saveImage(saved);
-    system(saved.c_str());
-    cout << "\nImage saved in " << saved << " successfully.\n" << endl;
 }
 
-// =================================================>> Filter 18 : Skewing image Filter <<================================================= //
-
-
-
-// =====================================================>> Filter 19 : Sea Filter <<===================================================== //
+// =====================================================>> Filter 16: Sea Filter <<===================================================== //
 
 void sea(Image & image)
 {
@@ -1140,11 +1099,9 @@ void sea(Image & image)
     }
 }
 
-// ======================================================>> Filter 20 : Filter <<====================================================== //
-
-
 
 // ===============================================================>> Main Application <<=============================================================== //
+
 
 int main() {
     // Showing what program do.
@@ -1153,8 +1110,8 @@ int main() {
     cout << "    in this once there is a 20 different filters that are : Grayscale filter, Black and White filter," << endl;
     cout << "    Invert image filter, Merge two image filter, Flipping image filter, Rotating image filter, Darken" << endl;
     cout << "    and Lighting image filter, Crop filter, Adding frame to image filter, Detect edge filter, Resizing" << endl;
-    cout << "    image, Blur filter, Natural Sunlight filter, Oil painting filter, Den Den mushi filter, Make image" << endl;
-    cout << "    purple, Infrared image filter, Image skewing filter, The Sea filter, , and we will try to not stop at this point and " << endl;
+    cout << "    image, Blur filter, Natural Sunlight filter, Oil painting filter, Make image" << endl;
+    cout << "    purple, Infrared image filter, The Sea filter, , and we will try to not stop at this point and " << endl;
     cout << "    continue for a bigger program." << endl;
     cout << "================================================================================================================" << endl;
     string nameimage;
@@ -1166,17 +1123,18 @@ int main() {
     // To keep the program running.
     while (true) {
         // Menu choice to check of it
+        bool checkkk = false;
         string choice_menu;
         while (true) {
             cout << "\nChoose One Of This Filters:-" << endl;
             cout << " [1] Grayscale Conversion.\n [2] Black and White Filter.\n [3] Invert Image Colours.\n [4] Merge Two Image.\n [5] Flip Image.\n [6] Rotating Image.\n";
             cout << " [7] Darken and lighting Image.\n [8] Crop Image.\n [9] Adding Frame to Image.\n [10] Detect edge Filter.\n [11] Resizing Image Filter.\n";
-            cout << " [12] Blur Filter.\n [13] Natural Sunlight Filter.\n [14] Oil Painting Filter.\n [15] Den Den Mochi Filter.\n [16] Look Purple Filter.\n";
-            cout << " [17] Infrared Image Filter.\n [18] Skewing Image Filter.\n [19] The Sea Filter.\n [20] Filter.\n [21] Saving Image. \n [22] Exit Application .\nEnter Your Choice : ";
+            cout << " [12] Blur Filter.\n [13] Natural Sunlight Filter.\n [14] Look Purple Filter.\n [15] Infrared Image Filter.\n";
+            cout << " [16] The Sea Filter.\n [17] Saving Image and Changing image. \n [18] Exit Application .\nEnter Your Choice : ";
             getline(cin, choice_menu);
 
             bool check = false;
-            for (int i = 1; i <= 21; i++) {         // Checking of answer.
+            for (int i = 1; i <= 18; i++) {         // Checking of answer.
                 if (choice_menu == to_string(i)) {
                     check = true;
                     break;
@@ -1188,116 +1146,80 @@ int main() {
             cout << "Invalid Choice. Try Again." << endl << endl;
         }
 
-        // Gray scale filter
+        // Gray scale filter.
         if (choice_menu == "1")
             grayscale_conversion(image);
 
-            // Black and White filter
+            // Black and White filter.
         else if (choice_menu == "2")
             black_and_white(image);
 
-            // Invert Image filter
+            // Invert Image filter.
         else if (choice_menu == "3")
             invert_image(image);
 
-            // Merge Two Image Filters
-            // else if (choice_menu == "4")
-            // merge_two_image(nameimage);
+            // Merge Two Image filter.
+        else if (choice_menu == "4")
+            merge_filter(image);
 
-            // Flip filter
+            // Flip filter.
         else if (choice_menu == "5")
             Flip_image(image);
 
-            // Rotate filter
+            // Rotate filter.
         else if (choice_menu == "6")
-            rotate_image(nameimage);
+            rotate_image(image);
 
-            // Darken and lighten Image filter
+            // Darken and lighten Image filter.
         else if (choice_menu == "7")
             Lighten_Darken(image);
 
-            // Crop filter
+            // Crop filter.
         else if (choice_menu == "8")
-            crop_image(nameimage);
+            crop_image(image);
 
-            // Adding frame to image filter
+            // Adding frame to image filter.
         else if (choice_menu == "9")
-            adding_a_frame(nameimage);
+            adding_a_frame(image);
 
-            // Detect edges in image
+            // Detect edges in image.
         else if (choice_menu == "10")
             detect_edges(image);
 
-            // Resize image filter
+            // Resize image filter.
         else if (choice_menu == "11")
-            resize_filter(nameimage);
+            resize_filter(image);
 
-            // Blur filter
+            // Blur filter.
         else if (choice_menu == "12")
-            blur_images(nameimage);
+            blur_images(image);
 
-            // Natural sunlight filter
+            // Natural sunlight filter.
         else if (choice_menu == "13")
-            natural_sunlight(nameimage);
+            natural_sunlight(image);
 
-            // Oil painting filter
-            // else if(choice_menu == "14")
-            //     oil_painting(nameimage);
+            // Make image purple filter.
+        else if (choice_menu == "14")
+            look_purple(image);
 
-            // Den Den Mochi filter
-        else if(choice_menu == "15")
-            old_tv(image);
-
-            // Make image purple filter
-        else if (choice_menu == "16")
-            look_purple(nameimage);
-
-            // Infrared image filter
-        else if (choice_menu == "17")
-            infrared(nameimage);
-
-            // Skewing image Filter
-            // else if(choice_menu == "18")
-            //     skewing_image(nameimage);
+            // Infrared image filter.
+        else if (choice_menu == "15")
+            infrared(image);
 
             // The Sea filter.
-        else if(choice_menu == "19")
+        else if (choice_menu == "16")
             sea(image);
 
-            // Filter
-            // else if(choice_menu == "20")
-            //     filter(nameimage);
-
-            // To save photo
-        else if (choice_menu == "21") {
+            // To save the photo.
+        else if (choice_menu == "17") {
             string saved = savingWay(nameimage);
             image.saveImage(saved);
             cout << endl << "Image saved in " << saved << " successfully." << endl << endl;
-
-            // To see if a user wants to change a photo or not
-            while (true) {
-                cout << "Do You Want To Change Photo?\n [1] Yes.\n [2] No.\nEnter Your Choice: ";
-                string choice1;
-                getline(cin, choice1);
-
-                if (choice1 == "1") {              // If he wants to
-                    cout << "The filename should end with the extension .jpg or.png or.bmp or.jpeg\n";
-                    cout << "Please, Enter the photo :\n";
-                    getline(cin, nameimage);
-                    nameimage = validationpart1(nameimage);
-                    break;
-                }
-
-                else if (choice1 == "2")          // If he doesn't
-                    break;
-
-                // If he entered an invalid choice
-                cout << "Invalid Choice. Try Again." << endl;
-            }
+            checkkk = true;
         }
 
             // To exit program
-        else if (choice_menu == "22") {
+        else if (choice_menu == "18") {
             while (true) {
                 cout << "Did you saved your work?\nNote : If you dont save you will lose all your work.\n [1] Yes, I saved it.\n [2] No, I want to save it.\nEnter Your choice :";
                 string end;
@@ -1329,28 +1251,56 @@ int main() {
                 break;
 
             else if (choice == "2") {        // If he doesn't
-                while (true) {
-                    cout << "Did you saved your work?\nNote : If you dont save you will lose all your work.\n [1] Yes, I saved it.\n [2] No, I want to save it.\nEnter Your Choice :";
-                    string end;
-                    getline(cin, end);
-                    if (end == "2") {
-                        string saved = savingWay(nameimage);
-                        image.saveImage(saved);
-                        cout << endl << "Image saved in " << saved << " successfully." << endl << endl;
-                        cout << endl << "# === Thanks For Using Our Application !! === #" << endl;
-                        return 0;
-                    }
+                if(!checkkk){
+                    while (true) {
+                        cout << "Did you saved your work?\nNote : If you dont save you will lose all your work.\n [1] Yes, I saved it.\n [2] No, I want to save it.\nEnter Your Choice :";
+                        string end;
+                        getline(cin, end);
+                        if (end == "2") {
+                            string saved = savingWay(nameimage);
+                            image.saveImage(saved);
+                            cout << endl << "Image saved in " << saved << " successfully." << endl << endl;
+                            cout << endl << "# === Thanks For Using Our Application !! === #" << endl;
+                            return 0;
+                        }
 
-                    else if (end == "1") {
-                        cout << endl << "# === Thanks For Using Our Application !! === #" << endl;
-                        return 0;
-                    }
+                        else if (end == "1") {
+                            cout << endl << "# === Thanks For Using Our Application !! === #" << endl;
+                            return 0;
+                        }
 
-                    cout << "Please, Enter a valid option" << endl;
+                        cout << "Please, Enter a valid option." << endl;
+                    }
+                }else{
+                    cout << endl << "# === Thanks For Using Our Application !! === #" << endl;
+                    return 0;
                 }
             }
             // If he entered an invalid choice
             cout << "Invalid Choice. Try Again." << endl;
+        }
+
+        if(checkkk){
+            // To see if a user wants to change a photo or not
+            while (true) {
+                cout << "Do You Want To Change Photo?\n [1] Yes.\n [2] No.\nEnter Your Choice: ";
+                string choice1;
+                getline(cin, choice1);
+
+                if (choice1 == "1") {              // If he wants to
+                    cout << "The filename should end with the extension .jpg or.png or.bmp or.jpeg\n";
+                    cout << "Please, Enter the photo :\n";
+                    getline(cin, nameimage);
+                    nameimage = validationpart1(nameimage);
+                    break;
+                }
+
+                else if (choice1 == "2")          // If he doesn't
+                    break;
+
+                // If he entered an invalid choice
+                cout << "Invalid Choice. Try Again." << endl;
+            }
         }
     }
     return 0;
