@@ -5,18 +5,10 @@
              Invert image filter, Merge two images, Flip image filter, Rotation image filter, Darken and
              Lighten image filter, Crop filter, Adding frame to image filter, Detect edge filter, Resizing image,
              Blur filter, Natural Sunlight filter, Oil painting filter, Den Den mushi filter, Make image purple filter,
-             Infrared image filter, Image skewing filter, The Sea filter, , and we will try to not stop at this point and continue for
+             Infrared image filter, Image skewing filter, The Sea filter, and we will try to not stop at this point and continue for
              a bigger program.
-
---> Author of (1, 4, 7, 10) filters: Fatema El-Zhraa Ahmed Mohamed El-Fiky.             (ID:20230280)         (Section : S22)
---> Email : fatmaelfeky922@gmail.com
-
---> Author of (2, 5, 8, 11) filters: Aly El-Deen Yasser Aly.                            (ID:20231109)         (Section : S22)
---> Email : aibakgaming747@gmail.com
-
---> Author of (3, 6, 9, 12) filters: Mohammed Atef Abd EL-Kader Bayomi.                 (ID:20231143)         (Section : S22)
---> Email : mohamed45452020@gmail.com
-======================================================================================================================================================================= */
+             
+# ================================================================================================================================================== #*/
 
 // Defining libraries.
 #include <bits/stdc++.h>
