@@ -3,7 +3,7 @@
 - A small project for editing the photos with 16 different filters.
 
 - ## Filters Type 
-  -  Grayscale Filter.
+  -  Grayscale filter.
   -  Black and white filter.
   -  Invert filter.
   -  Merge two image filter.
@@ -18,3 +18,4 @@
   -  Natural Sunlight filter.
   -  Look Purple filter.
   -  Infrared filter.
+  -  Sea filter.
